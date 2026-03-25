@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+textarea { font-family: 'Courier New', Courier, monospace; }
+
+.score-ring { transition: stroke-dashoffset 0.6s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.3s ease; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  border-top-color: #86A5CA;
+  animation: spin 0.8s linear infinite;
+}
+

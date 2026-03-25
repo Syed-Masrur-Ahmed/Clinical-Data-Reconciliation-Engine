@@ -1,5 +1,5 @@
-from typing import Annotated
-from pydantic import BaseModel, Field
+from typing import Annotated, Literal, Union
+from pydantic import BaseModel, Field, model_validator
 
 
 # ---------------------------------------------------------------------------
@@ -21,11 +21,18 @@ class PatientContext(BaseModel):
 class MedicationSource(BaseModel):
     system: Annotated[str, Field(description="Name of the source healthcare system (e.g. 'EHR-A', 'Pharmacy-B')")]
     medication: Annotated[str, Field(description="Medication name, dose, and frequency as recorded by this source")]
-    last_updated: Annotated[str, Field(description="ISO-8601 date/time the record was last updated")]
+    last_updated: str | None = Field(default=None, description="ISO-8601 date/time the record was last updated")
+    last_filled: str | None = Field(default=None, description="ISO-8601 date/time the prescription was last filled (pharmacy sources)")
     source_reliability: Annotated[
-        float,
-        Field(ge=0.0, le=1.0, description="Reliability weight of this source, from 0.0 (unreliable) to 1.0 (authoritative)"),
+        Union[Literal["low", "medium", "high"], float],
+        Field(description="Reliability of this source: 'low', 'medium', 'high', or a float from 0.0 (unreliable) to 1.0 (authoritative)"),
     ]
+
+    @model_validator(mode="after")
+    def require_some_date(self) -> "MedicationSource":
+        if self.last_updated is None and self.last_filled is None:
+            raise ValueError("Either 'last_updated' or 'last_filled' must be provided")
+        return self
 
 
 class ClinicalSafetyCheck(BaseModel):

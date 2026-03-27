@@ -100,6 +100,43 @@ All POST endpoints require an `X-API-Key` header matching the `API_KEY` environm
 
 ---
 
+## Key Design Decisions and Trade-offs
+
+### 1. Schema-Enforced LLM Output (Constrained Decoding)
+**Decision:** Pass Pydantic models directly as `response_schema` to the Gemini SDK rather than prompting the model to "return JSON" and parsing the string output.
+
+**Trade-off:** This ties the application to the Gemini SDK's structured output feature specifically. Switching to a different provider (e.g., Claude, GPT-4o) would require reworking the output contract. That said, the reliability gain is non-negotiable in a clinical context: hallucinated field names or subtly malformed JSON would silently corrupt downstream logic, which is unacceptable for patient safety.
+
+---
+
+### 2. Verbatim JSON Injection into Prompts
+**Decision:** Serialize the full request payload as indented JSON and embed it literally in the prompt, rather than paraphrasing it in natural language.
+
+**Trade-off:** Prompts are longer and consume more tokens. However, natural-language paraphrasing of clinical data (doses, frequencies, timestamps) introduces lossy summarization. The model reasons over your summary, not the source data. For medication reconciliation, where a "500 mg" vs "50 mg" distinction can be life-critical, verbatim injection is the safer default.
+
+---
+
+### 3. In-Memory Caching with SHA-256 Payload Hashing
+**Decision:** Hash each request payload and serve identical requests from an in-memory cache, bypassing the LLM entirely on cache hits.
+
+**Trade-off:** The cache does not survive server restarts and is not shared across instances, making it unsuitable for multi-replica deployments. For this scope (single-server, demo-scale), it meaningfully reduces API quota consumption and latency. A Redis layer would be the production upgrade path.
+
+---
+
+### 4. Rule-Based Data Quality Scoring (No LLM)
+**Decision:** The timeliness and completeness dimensions of `/api/validate/data-quality` are computed with deterministic rules (field presence checks, timestamp math, vital sign range validation). Only clinical plausibility uses the LLM.
+
+**Trade-off:** Rule-based scoring is fast, cheap, and fully explainable. You can point to exactly which field caused a score deduction. A fully LLM-driven quality score would be richer but non-deterministic, expensive, and harder to audit. In regulated healthcare environments, explainability and reproducibility outweigh model sophistication.
+
+---
+
+### 5. API Key Authentication (Not OAuth2)
+**Decision:** All POST endpoints are protected by a shared secret passed as an `X-API-Key` header.
+
+**Trade-off:** A single shared key is easy to set up and sufficient for a demo, but it provides no per-user identity, no token expiry, and no revocation granularity. In a real clinical deployment, OAuth2/OIDC with role-based access control would be required for HIPAA compliance. This was an explicit scope trade-off documented in "What I Would Improve."
+
+---
+
 ## What I Would Improve With More Time
 
 ### Engineering

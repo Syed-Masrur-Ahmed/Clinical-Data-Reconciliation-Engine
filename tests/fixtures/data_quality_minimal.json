@@ -1,0 +1,11 @@
+{
+  "_comment": "Sparse record — many optional fields absent; exercises completeness scoring",
+  "demographics": {
+    "name": "John Doe"
+  },
+  "medications": [],
+  "allergies": [],
+  "conditions": [],
+  "vital_signs": {},
+  "last_updated": "2025-09-01T00:00:00Z"
+}

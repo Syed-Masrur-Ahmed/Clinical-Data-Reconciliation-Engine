@@ -1,5 +1,14 @@
+import re
 from typing import Annotated, Literal, Union
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(T[\d:.+Z-]*)?$")
+
+
+def _check_iso_date(v: str | None) -> str | None:
+    if v is not None and not _ISO_DATE_RE.match(v):
+        raise ValueError(f"'{v}' is not a valid ISO-8601 date or datetime string")
+    return v
 
 
 # ---------------------------------------------------------------------------
@@ -27,6 +36,19 @@ class MedicationSource(BaseModel):
         Union[Literal["low", "medium", "high"], float],
         Field(description="Reliability of this source: 'low', 'medium', 'high', or a float from 0.0 (unreliable) to 1.0 (authoritative)"),
     ]
+
+    @field_validator("last_updated", "last_filled", mode="before")
+    @classmethod
+    def validate_dates(cls, v: str | None) -> str | None:
+        return _check_iso_date(v)
+
+    @field_validator("source_reliability", mode="before")
+    @classmethod
+    def validate_reliability(cls, v: object) -> object:
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            if not (0.0 <= float(v) <= 1.0):
+                raise ValueError("source_reliability float must be between 0.0 and 1.0")
+        return v
 
     @model_validator(mode="after")
     def require_some_date(self) -> "MedicationSource":
@@ -83,6 +105,11 @@ class DemographicsRecord(BaseModel):
     phone: str | None = None
     insurance_id: str | None = None
 
+    @field_validator("dob", mode="before")
+    @classmethod
+    def validate_dob(cls, v: str | None) -> str | None:
+        return _check_iso_date(v)
+
 
 class MedicationRecord(BaseModel):
     name: Annotated[str, Field(description="Medication name")]
@@ -90,6 +117,11 @@ class MedicationRecord(BaseModel):
     frequency: str | None = None
     prescriber: str | None = None
     start_date: str | None = Field(default=None, description="ISO-8601 date the medication was started")
+
+    @field_validator("start_date", mode="before")
+    @classmethod
+    def validate_start_date(cls, v: str | None) -> str | None:
+        return _check_iso_date(v)
 
 
 class AllergyRecord(BaseModel):
@@ -102,6 +134,11 @@ class ConditionRecord(BaseModel):
     name: Annotated[str, Field(description="Diagnosis name or ICD code description")]
     onset_date: str | None = Field(default=None, description="ISO-8601 date of diagnosis")
     status: str | None = Field(default=None, description="e.g. 'active', 'resolved', 'chronic'")
+
+    @field_validator("onset_date", mode="before")
+    @classmethod
+    def validate_onset_date(cls, v: str | None) -> str | None:
+        return _check_iso_date(v)
 
 
 class VitalSigns(BaseModel):
@@ -121,6 +158,12 @@ class DataQualityRequest(BaseModel):
     conditions: list[ConditionRecord] = Field(default_factory=list)
     vital_signs: VitalSigns
     last_updated: Annotated[str, Field(description="ISO-8601 date/time the overall record was last updated")]
+
+    @field_validator("last_updated", mode="before")
+    @classmethod
+    def validate_last_updated(cls, v: str) -> str:
+        _check_iso_date(v)
+        return v
 
 
 class QualityDimensionBreakdown(BaseModel):
@@ -146,7 +189,7 @@ class DetectedIssue(BaseModel):
     field: Annotated[str, Field(description="The record field where the issue was detected")]
     issue: Annotated[str, Field(description="Human-readable description of the data quality problem")]
     severity: Annotated[
-        str,
+        Literal["low", "medium", "high"],
         Field(description="Issue severity: 'low', 'medium', or 'high'"),
     ]
 

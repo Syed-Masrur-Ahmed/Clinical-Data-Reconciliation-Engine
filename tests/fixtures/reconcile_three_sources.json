@@ -1,0 +1,27 @@
+{
+  "patient_context": {
+    "age": 72,
+    "conditions": ["Atrial Fibrillation", "Chronic Kidney Disease Stage 3"],
+    "recent_labs": {"eGFR": 42, "INR": 2.8, "creatinine": 1.6}
+  },
+  "sources": [
+    {
+      "system": "EHR-Primary",
+      "medication": "Warfarin 5mg daily",
+      "last_updated": "2026-03-10T09:00:00Z",
+      "source_reliability": "high"
+    },
+    {
+      "system": "Cardiology-EMR",
+      "medication": "Warfarin 7.5mg daily",
+      "last_updated": "2026-03-18T14:30:00Z",
+      "source_reliability": "high"
+    },
+    {
+      "system": "Pharmacy-C",
+      "medication": "Warfarin 5mg daily",
+      "last_filled": "2026-03-20T00:00:00Z",
+      "source_reliability": 0.75
+    }
+  ]
+}

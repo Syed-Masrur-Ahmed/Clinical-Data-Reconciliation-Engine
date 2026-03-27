@@ -1,0 +1,21 @@
+{
+  "patient_context": {
+    "age": 65,
+    "conditions": ["Type 2 Diabetes", "Hypertension"],
+    "recent_labs": {"HbA1c": 7.2, "eGFR": 58}
+  },
+  "sources": [
+    {
+      "system": "EHR-A",
+      "medication": "Metformin 500mg twice daily",
+      "last_updated": "2026-03-20T10:00:00Z",
+      "source_reliability": 0.9
+    },
+    {
+      "system": "Pharmacy-B",
+      "medication": "Metformin 1000mg twice daily",
+      "last_updated": "2026-03-22T08:00:00Z",
+      "source_reliability": 0.8
+    }
+  ]
+}

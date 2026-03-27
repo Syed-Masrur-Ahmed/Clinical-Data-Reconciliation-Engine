@@ -12,9 +12,9 @@ The system follows a clean three-tier architecture: a **Next.js + Tailwind front
 
 FastAPI was chosen over Flask or Django REST Framework for three concrete reasons:
 
-1. **Native async support** — Gemini API calls are I/O-bound; async route handlers avoid blocking the event loop and allow concurrent requests without extra threading overhead.
-2. **Pydantic-first** — FastAPI treats Pydantic models as first-class citizens. Request bodies are validated, coerced, and documented automatically; no separate serializer layer is needed.
-3. **Auto-generated OpenAPI docs** — `/docs` is available out of the box, which is useful for manual testing against live endpoints without a separate tool.
+1. **Native async support**: Gemini API calls are I/O-bound; async route handlers avoid blocking the event loop and allow concurrent requests without extra threading overhead.
+2. **Pydantic-first**: FastAPI treats Pydantic models as first-class citizens. Request bodies are validated, coerced, and documented automatically; no separate serializer layer is needed.
+3. **Auto-generated OpenAPI docs**: `/docs` is available out of the box, which is useful for manual testing against live endpoints without a separate tool.
 
 ### Tailwind CSS + Next.js (Frontend)
 

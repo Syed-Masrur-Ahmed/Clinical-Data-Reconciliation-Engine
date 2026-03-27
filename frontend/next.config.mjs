@@ -1,6 +1,3 @@
-import { loadEnvConfig } from '@next/env';
-loadEnvConfig(new URL('..', import.meta.url).pathname);
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async rewrites() {

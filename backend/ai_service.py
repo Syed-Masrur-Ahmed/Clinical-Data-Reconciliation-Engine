@@ -32,11 +32,10 @@ import logging
 import os
 
 from google import genai
-from google.genai import types
-from google.api_core.exceptions import ResourceExhausted, ServiceUnavailable, TooManyRequests
+from google.genai import errors as genai_errors, types
 from tenacity import (
     retry,
-    retry_if_exception_type,
+    retry_if_exception,
     stop_after_attempt,
     wait_exponential,
     before_sleep_log,
@@ -46,11 +45,18 @@ from database import audit_log, reconciliation_cache, validation_cache
 
 logger = logging.getLogger(__name__)
 
-# Retry on rate-limit (429) and transient server errors (503).
-_RETRYABLE = (ResourceExhausted, TooManyRequests, ServiceUnavailable)
+
+def _is_retryable(exc: BaseException) -> bool:
+    """Return True for rate-limit (429) and transient server errors (5xx)."""
+    if isinstance(exc, genai_errors.ServerError):
+        return True
+    if isinstance(exc, genai_errors.ClientError):
+        return "429" in str(exc) or "quota" in str(exc).lower() or "resource exhausted" in str(exc).lower()
+    return False
+
 
 _retry_policy = retry(
-    retry=retry_if_exception_type(_RETRYABLE),
+    retry=retry_if_exception(_is_retryable),
     wait=wait_exponential(multiplier=1, min=2, max=60),
     stop=stop_after_attempt(4),
     before_sleep=before_sleep_log(logger, logging.WARNING),
@@ -139,7 +145,7 @@ Return your analysis as a single structured JSON object matching the required sc
         reconciliation_cache[key] = result.model_dump()
         audit_log.append({"endpoint": "reconcile", "cache_key": key, "cached": False})
         return result
-    except _RETRYABLE as exc:
+    except (genai_errors.ClientError, genai_errors.ServerError) as exc:
         raise RuntimeError(f"Gemini rate limit or unavailability after retries: {exc}") from exc
     except Exception as exc:
         raise RuntimeError(f"Gemini reconciliation call failed: {exc}") from exc
@@ -213,7 +219,7 @@ Return your assessment as a single structured JSON object matching the required 
         validation_cache[key] = result.model_dump()
         audit_log.append({"endpoint": "validate", "cache_key": key, "cached": False})
         return result
-    except _RETRYABLE as exc:
+    except (genai_errors.ClientError, genai_errors.ServerError) as exc:
         raise RuntimeError(f"Gemini rate limit or unavailability after retries: {exc}") from exc
     except Exception as exc:
         raise RuntimeError(f"Gemini validation call failed: {exc}") from exc

@@ -77,7 +77,7 @@ class MedicationReconciliationResponse(BaseModel):
 
 class DemographicsRecord(BaseModel):
     name: str | None = None
-    date_of_birth: str | None = Field(default=None, description="ISO-8601 date string (YYYY-MM-DD)")
+    dob: str | None = Field(default=None, description="ISO-8601 date string (YYYY-MM-DD)")
     gender: str | None = None
     address: str | None = None
     phone: str | None = None

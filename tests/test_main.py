@@ -75,7 +75,7 @@ MEDICATION_RECONCILE_PAYLOAD = {
 DATA_QUALITY_PAYLOAD = {
     "demographics": {
         "name": "Jane Smith",
-        "date_of_birth": "1960-05-15",
+        "dob": "1960-05-15",
         "gender": "female",
         "address": "123 Main St",
         "phone": "555-0100",

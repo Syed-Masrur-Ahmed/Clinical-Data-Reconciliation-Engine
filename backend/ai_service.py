@@ -146,7 +146,7 @@ def validate_data_quality(data: DataQualityRequest) -> DataQualityResponse:
 ## Scoring Dimensions (each scored 0–100)
 
 **Completeness (weight 30%)** — What percentage of clinically important fields are populated?
-Consider: demographics (name, date_of_birth, gender), at least one medication entry with dose and frequency, any allergies or active conditions documented, and all core vital signs (blood_pressure, heart_rate, temperature, oxygen_saturation).
+Consider: demographics (name, dob, gender), at least one medication entry with dose and frequency, any allergies or active conditions documented, and all core vital signs (blood_pressure, heart_rate, temperature, oxygen_saturation).
 
 **Accuracy (weight 25%)** — Are field values internally consistent and correctly formatted?
 Check: dates follow ISO-8601 (YYYY-MM-DD), blood_pressure follows "systolic/diastolic mmHg", medication doses include units, allergy severity uses standard terms (mild/moderate/severe/life-threatening).
@@ -161,7 +161,7 @@ Flag: heart_rate outside 20–300 bpm; oxygen_saturation outside 70–100 %; tem
 1. Score each dimension independently from 0 to 100 using the criteria above.
 2. Compute overall_score as the weighted average: completeness×0.30 + accuracy×0.25 + timeliness×0.20 + clinical_plausibility×0.25.
 3. For every problem found, emit one entry in issues_detected with:
-   - field: the exact model field name (e.g. "vital_signs.heart_rate", "demographics.date_of_birth")
+   - field: the exact model field name (e.g. "vital_signs.heart_rate", "demographics.dob")
    - issue: a concise, human-readable description of the problem
    - severity: "low" (minor/cosmetic), "medium" (incomplete but workable), or "high" (dangerous or unusable)
 4. Be precise: missing optional fields are low-severity; clinically impossible vital signs or absent critical identifiers are high-severity.

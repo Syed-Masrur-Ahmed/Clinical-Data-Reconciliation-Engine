@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { ApiKeyProvider } from '@/context/ApiKeyContext';
+import BackendWaker from './_components/BackendWaker';
 
 export const metadata: Metadata = {
   title: 'MediCheck',
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           className="fixed inset-0 -z-10 opacity-50"
           style={{ background: "url('/background.jpg') center/cover no-repeat" }}
         />
+        <BackendWaker />
         <ApiKeyProvider>{children}</ApiKeyProvider>
       </body>
     </html>

@@ -1,5 +1,9 @@
 import { ReconcileRequest, ReconcileResponse, ValidateRequest, ValidateResponse } from './types';
 
+export function pingBackend(): void {
+  fetch('/health').catch(() => {/* ignore — just waking up the server */});
+}
+
 async function callApi<T>(path: string, body: unknown, apiKey: string): Promise<T> {
   if (!apiKey) throw new Error('Enter your API key in the header before submitting.');
 

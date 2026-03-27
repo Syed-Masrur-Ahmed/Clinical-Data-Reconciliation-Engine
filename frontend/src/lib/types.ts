@@ -37,7 +37,7 @@ export interface ReconcileResponse {
 export interface ValidateRequest {
   demographics: {
     name?: string;
-    date_of_birth?: string;
+    dob?: string;
     gender?: string;
     address?: string;
     phone?: string;

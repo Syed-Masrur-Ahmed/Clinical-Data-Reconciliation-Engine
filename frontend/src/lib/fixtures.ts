@@ -31,7 +31,7 @@ export const RECONCILE_SAMPLE: ReconcileRequest = {
 export const VALIDATE_SAMPLE: ValidateRequest = {
   demographics: {
     name: 'John Smith',
-    date_of_birth: '1658-04-12',
+    dob: '1658-04-12',
     gender: 'male',
     address: '123 Main St, Springfield, IL 62701',
     phone: '555-867-5309',

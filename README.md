@@ -96,24 +96,24 @@ All POST endpoints require an `X-API-Key` header matching the `API_KEY` environm
 
 ### Engineering
 
-- **Persistent storage** — Replace the in-memory dicts with a lightweight embedded database (e.g., SQLite via SQLModel) so audit logs and cached results survive server restarts.
-- **Streaming responses** — Stream Gemini output tokens to the frontend so clinicians see reasoning appear incrementally rather than waiting for the full response.
-- **Rate limiting** — Add per-key rate limiting middleware to prevent abuse of the Gemini quota.
-- **Async Gemini client** — The current implementation calls the Gemini SDK synchronously inside an async route handler. Wrapping it with `asyncio.to_thread()` or switching to the async client would prevent blocking the event loop under load.
-- **Docker Compose** — Package backend and frontend together so the entire stack starts with one command.
+- **Persistent storage**: Replace the in-memory dicts with a lightweight embedded database (e.g., SQLite via SQLModel) so audit logs and cached results survive server restarts.
+- **Streaming responses**: Stream Gemini output tokens to the frontend so clinicians see reasoning appear incrementally rather than waiting for the full response.
+- **Rate limiting**: Add per-key rate limiting middleware to prevent abuse of the Gemini quota.
+- **Async Gemini client**: The current implementation calls the Gemini SDK synchronously inside an async route handler. Wrapping it with `asyncio.to_thread()` or switching to the async client would prevent blocking the event loop under load.
+- **Docker Compose**: Package backend and frontend together so the entire stack starts with one command.
 
 ### Clinical Logic
 
-- **Drug interaction database** — Supplement the LLM's reasoning with a structured drug-drug interaction lookup (e.g., RxNorm / OpenFDA API) to catch interactions the model might miss or hallucinate.
-- **Confidence calibration** — Run the reconciliation prompt multiple times with temperature > 0 and use ensemble agreement to produce a statistically calibrated confidence score rather than a single-shot estimate.
-- **Timeliness decay curve** — The current timeliness score uses a linear decay to zero at 365 days. A clinical domain expert should define the appropriate decay function (e.g., exponential, stepped by record type).
-- **Audit trail** — Persist the full reconciliation decision log (including which clinician approved/rejected and when) for regulatory compliance.
+- **Drug interaction database**: Supplement the LLM's reasoning with a structured drug-drug interaction lookup (e.g., RxNorm / OpenFDA API) to catch interactions the model might miss or hallucinate.
+- **Confidence calibration**: Run the reconciliation prompt multiple times with temperature > 0 and use ensemble agreement to produce a statistically calibrated confidence score rather than a single-shot estimate.
+- **Timeliness decay curve**: The current timeliness score uses a linear decay to zero at 365 days. A clinical domain expert should define the appropriate decay function (e.g., exponential, stepped by record type).
+- **Audit trail**: Persist the full reconciliation decision log (including which clinician approved/rejected and when) for regulatory compliance.
 
 ### Frontend
 
-- **Authentication** — Replace the bare API key input with a proper login flow (OAuth2 / SSO) appropriate for a healthcare setting.
-- **Accessibility** — Add ARIA labels and keyboard navigation to meet WCAG 2.1 AA for clinical software.
-- **History panel** — Show the last N reconciliation and validation results within the session.
+- **Authentication**: Replace the bare API key input with a proper login flow (OAuth2 / SSO) appropriate for a healthcare setting.
+- **Accessibility**: Add ARIA labels and keyboard navigation to meet WCAG 2.1 AA for clinical software.
+- **History panel**: Show the last N reconciliation and validation results within the session.
 
 ---
 

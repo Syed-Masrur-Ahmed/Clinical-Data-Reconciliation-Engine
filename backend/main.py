@@ -29,7 +29,7 @@ def require_api_key(key: str | None = Security(_api_key_header)) -> str:
     if not _API_KEY:
         raise RuntimeError("API_KEY environment variable is not set")
     if key != _API_KEY:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or missing API key")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing API key")
     return key
 
 # ---------------------------------------------------------------------------

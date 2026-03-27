@@ -1,10 +1,18 @@
+import { loadEnvConfig } from '@next/env';
+loadEnvConfig(new URL('..', import.meta.url).pathname);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*',
+        destination: `${apiUrl}/api/:path*`,
+      },
+      {
+        source: '/health',
+        destination: `${apiUrl}/health`,
       },
     ];
   },

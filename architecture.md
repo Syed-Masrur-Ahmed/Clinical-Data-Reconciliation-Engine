@@ -1,4 +1,4 @@
-# Architecture: Clinical Data Reconciliation Engine
+# Architecture: MediCheck (Clinical Data Reconciliation Engine)
 
 ## Overview
 

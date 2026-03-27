@@ -1,9 +1,10 @@
 # MediCheck
 
-**Live at: https://medicheck-platform.vercel.app/**
+**Live at: https://medicheck-platform.vercel.app/**  
+(get API key by reaching out to syed.masrur.ahmed.28@dartmouth.edu)
 
 **Backend deployed at https://medicheck-1iz6.onrender.com**  
-(check https://medicheck-1iz6.onrender.com/health to see if it's running)
+(check https://medicheck-1iz6.onrender.com/health to see if it's running!)
 
 A full-stack mini application that uses an LLM to reconcile conflicting patient medication records and evaluate clinical data quality. Built with FastAPI, Next.js, Tailwind CSS, and Google Gemini.
 
@@ -65,6 +66,8 @@ npm run dev
 # From project root
 pytest
 ```
+
+There are also some test data files in `tests/fixtures` which you can copy/paste into the frontend.
 
 ---
 

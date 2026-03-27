@@ -28,12 +28,34 @@ database.py, skipping the API call entirely and saving latency and quota.
 
 import hashlib
 import json
+import logging
 import os
 
 from google import genai
 from google.genai import types
+from google.api_core.exceptions import ResourceExhausted, ServiceUnavailable, TooManyRequests
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+    before_sleep_log,
+)
 
 from database import audit_log, reconciliation_cache, validation_cache
+
+logger = logging.getLogger(__name__)
+
+# Retry on rate-limit (429) and transient server errors (503).
+_RETRYABLE = (ResourceExhausted, TooManyRequests, ServiceUnavailable)
+
+_retry_policy = retry(
+    retry=retry_if_exception_type(_RETRYABLE),
+    wait=wait_exponential(multiplier=1, min=2, max=60),
+    stop=stop_after_attempt(4),
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+    reraise=True,
+)
 from models import (
     DataQualityRequest,
     DataQualityResponse,
@@ -101,18 +123,24 @@ Your task is to analyse conflicting medication records from multiple healthcare 
 Return your analysis as a single structured JSON object matching the required schema exactly."""
 
     try:
-        response = client.models.generate_content(
-            model=MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=MedicationReconciliationResponse,
-            ),
-        )
-        result: MedicationReconciliationResponse = response.parsed
+        @_retry_policy
+        def _call() -> MedicationReconciliationResponse:
+            resp = client.models.generate_content(
+                model=MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=MedicationReconciliationResponse,
+                ),
+            )
+            return resp.parsed
+
+        result = _call()
         reconciliation_cache[key] = result.model_dump()
         audit_log.append({"endpoint": "reconcile", "cache_key": key, "cached": False})
         return result
+    except _RETRYABLE as exc:
+        raise RuntimeError(f"Gemini rate limit or unavailability after retries: {exc}") from exc
     except Exception as exc:
         raise RuntimeError(f"Gemini reconciliation call failed: {exc}") from exc
 
@@ -169,17 +197,23 @@ Flag: heart_rate outside 20–300 bpm; oxygen_saturation outside 70–100 %; tem
 Return your assessment as a single structured JSON object matching the required schema exactly."""
 
     try:
-        response = client.models.generate_content(
-            model=MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=DataQualityResponse,
-            ),
-        )
-        result: DataQualityResponse = response.parsed
+        @_retry_policy
+        def _call() -> DataQualityResponse:
+            resp = client.models.generate_content(
+                model=MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=DataQualityResponse,
+                ),
+            )
+            return resp.parsed
+
+        result = _call()
         validation_cache[key] = result.model_dump()
         audit_log.append({"endpoint": "validate", "cache_key": key, "cached": False})
         return result
+    except _RETRYABLE as exc:
+        raise RuntimeError(f"Gemini rate limit or unavailability after retries: {exc}") from exc
     except Exception as exc:
         raise RuntimeError(f"Gemini validation call failed: {exc}") from exc

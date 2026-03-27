@@ -1,5 +1,9 @@
 # MediCheck
 
+**Live at: https://medicheck-platform.vercel.app/**
+
+**Backend deployed at https://medicheck-1iz6.onrender.com**
+
 A full-stack mini application that uses an LLM to reconcile conflicting patient medication records and evaluate clinical data quality. Built with FastAPI, Next.js, Tailwind CSS, and Google Gemini.
 
 ---

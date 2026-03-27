@@ -180,19 +180,45 @@ All POST endpoints require an `X-API-Key` header matching the `API_KEY` environm
 ```
 .
 ├── backend/
-│   ├── main.py          # FastAPI routing & auth
-│   ├── models.py        # Pydantic request/response schemas
-│   ├── ai_service.py    # Gemini integration & prompt engineering
-│   ├── database.py      # In-memory cache & audit log
+│   ├── main.py               # FastAPI routing & auth
+│   ├── models.py             # Pydantic request/response schemas
+│   ├── ai_service.py         # Gemini integration & prompt engineering
+│   ├── database.py           # In-memory cache & audit log
 │   └── requirements.txt
 ├── frontend/
-│   └── src/
-│       ├── app/         # Next.js App Router pages & layouts
-│       ├── context/     # Global API key state
-│       └── lib/         # API client, types, fixtures, helpers
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── _components/
+│   │   │   │   ├── BackendWaker.tsx    # Pings /health on mount to wake backend
+│   │   │   │   ├── DimensionBar.tsx   # Quality score dimension bar
+│   │   │   │   ├── EmptyState.tsx
+│   │   │   │   ├── ErrorAlert.tsx
+│   │   │   │   ├── Header.tsx
+│   │   │   │   ├── JsonInputCard.tsx  # JSON textarea with sample loader
+│   │   │   │   ├── ReconcilePanel.tsx
+│   │   │   │   ├── ReconcileResult.tsx
+│   │   │   │   ├── ResultCard.tsx
+│   │   │   │   ├── RingChart.tsx      # Circular overall score indicator
+│   │   │   │   ├── TabBar.tsx
+│   │   │   │   ├── ValidatePanel.tsx
+│   │   │   │   └── ValidateResult.tsx
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx               # Tab-based main page
+│   │   ├── context/
+│   │   │   └── ApiKeyContext.tsx       # Global API key state
+│   │   └── lib/
+│   │       ├── api.ts                 # API client functions
+│   │       ├── fixtures.ts            # Sample payloads for both endpoints
+│   │       ├── scoreHelpers.ts        # Quality score formatting utilities
+│   │       └── types.ts               # TypeScript interfaces mirroring backend models
+│   ├── next.config.mjs
+│   ├── tailwind.config.ts
+│   └── package.json
 ├── tests/
-│   └── test_main.py     # 7 unit tests (LLM calls mocked)
-├── architecture.md      # Design decisions & prompt engineering notes
+│   ├── fixtures/              # Sample JSON payloads for manual testing
+│   └── test_main.py           # 7 unit tests (LLM calls mocked)
+├── architecture.md            # Design decisions & prompt engineering notes
+├── pytest.ini
 ├── .env.example
 └── README.md
 ```
